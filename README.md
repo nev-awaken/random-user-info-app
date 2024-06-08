@@ -61,26 +61,6 @@ Before running the project, ensure that you have the following installed:
 3. The frontend application sends requests to the backend server every 10 seconds to retrieve the stored user data.
 4. The retrieved data is displayed in a table format in the frontend application.
 
-## Project Structure
-
-The project is structured as follows:
-├── backend/
-│ ├── app.R
-│ ├── setupDatabase.R
-│ ├── storeData.R
-│ ├── job.R
-│ ├── user_info_request_handler.R
-│ └── config.yaml
-└── frontend/
-├── src/
-│ ├── App.js
-│ └── App.css
-├── public/
-│ └── index.html
-├── package.json
-└── README.md
-
-
 
 ## Technologies Used
 
