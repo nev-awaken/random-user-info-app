@@ -3,7 +3,8 @@ import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import "./App.css"; 
+import "./App.css";
+import ReactECharts from "echarts-for-react";
 
 function App() {
   const [testMessage, setTestMessage] = useState("");
@@ -16,6 +17,35 @@ function App() {
     { field: "created_at", headerName: "Creation Date" },
     { field: "phone_number", headerName: "Phone Number" },
   ]);
+
+  const barOptions = {
+    tooltip: {
+      trigger: "axis"
+    },
+    title: {
+      text: "User Registrations Per Year",
+      textStyle: {
+        align: "center",
+      },
+    },
+    xAxis: {
+      type: "category",
+      data: [...new Set(rowData.map((user) => user.registered_date.substr(0, 4)))].sort(),
+    },
+    yAxis: {
+      type: "value",
+    },
+    series: [
+      {
+        data: [...new Set(rowData.map((user) => user.registered_date.substr(0, 4)))].sort().map(
+          (year) =>
+            rowData.filter((user) => user.registered_date.substr(0, 4) === year)
+              .length
+        ),
+        type: "bar",
+      },
+    ],
+  };
 
   useEffect(() => {
     console.log("Component mounted");
@@ -60,9 +90,14 @@ function App() {
       <h1>Random User Info</h1>
       <p>UI request Data every 10 seconds to the server</p>
       <p>Server retrieves data from a postgres Database</p>
-      <p>Data Source -API : <a href = "https://randomuser.me/api/">Random User API</a></p>
-      
-      <div className="ag-theme-quartz" style={{ height: 500, width: "100%" }}>
+      <p>
+        Data Source -API :{" "}
+        <a href="https://randomuser.me/api/">Random User API</a>
+      </p>
+      <div style={{ height: "300px", width: "100%" }}>
+        <ReactECharts option={barOptions} />
+      </div>
+      <div className="ag-theme-quartz" style={{ height: 600, width: "100%" }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columnDefs}
@@ -70,6 +105,7 @@ function App() {
           paginationPageSize={10}
         />
       </div>
+
       <h1>Test Message</h1>
       <p>{testMessage}</p>
     </div>

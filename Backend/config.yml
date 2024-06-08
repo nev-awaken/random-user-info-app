@@ -5,4 +5,3 @@ default:
     password: "your-password"
     port: "5432"
     dbname: "ambiorix_test"
-
