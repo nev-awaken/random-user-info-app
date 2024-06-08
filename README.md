@@ -1,6 +1,6 @@
 # Full Stack Web App: Random User Info
 
-This is a full stack web application that displays random user information retrieved from a PostgreSQL database. The backend is developed using R with the Ambiorix framework, while the frontend is built with React.
+This is a full stack web application that displays random user information retrieved from a PostgreSQL database. The backend is developed using R with the Ambiorix ([web framework](https://ambiorix.dev/)), while the frontend is built with React.
 
 ## Overview
 
