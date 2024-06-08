@@ -2,7 +2,7 @@ config <- read_yaml("config.yml")
 postgres_config <- config$default$postgres
 
 connectDatabase <- function() {
-  # Connect to the default database (e.g., "postgres")
+  # Connecting to default database - postgres initially
    con <- dbConnect(Postgres(),
                    user = postgres_config$user,
                    host = postgres_config$host,
