@@ -41,7 +41,7 @@ Before running the project, ensure that you have the following installed:
 ### Frontend Setup
 
 1. **Install the required dependencies:**
-   - Open a terminal and navigate to the `frontend` directory.
+   - Open a terminal and navigate to the `frontend/my-app` directory.
    - Run the following command to install the dependencies:
      ```bash
      npm install
