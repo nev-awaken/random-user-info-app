@@ -4,18 +4,20 @@ library(RPostgres)
 library(future)
 library(promises)
 
+config <- read_yaml("config.yml")
+postgres_config <- config$default$postgres
+
 ui_request_handler <- function(req, res) {
   cat("ui_request_handler called\n")
   
   future({
     con <- tryCatch({
       dbConnect(Postgres(),
-        user = "postgres",
-        host = "localhost",
-        password = "sa",
-        dbname = "ambiorix_test",
-        port = "5432"
-      )
+                   user = postgres_config$user,
+                   host = postgres_config$host,
+                   password = postgres_config$password,
+                   dbname = postgres_config$dbname,
+                   port = postgres_config$port)
     }, error = function(e) {
       cat("Failed to connect to database:", conditionMessage(e), "\n")
       return(list(error = TRUE, message = paste("Failed to connect to database:", conditionMessage(e))))
