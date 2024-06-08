@@ -4,8 +4,10 @@ This is a full stack web application that displays random user information retri
 
 ## Overview
 
-The application fetches random user data from the Random User API every 10 seconds and stores it in a PostgreSQL database. The frontend periodically retrieves the stored data from the backend server and displays it in a user-friendly table format.
+The application fetches random user data from the Random User API every 10 seconds and stores it in a PostgreSQL database. The frontend periodically retrieves the stored data from the backend server and displays a table format.
+
 ![User Interface](./app-user-interface-.png)
+
 ## Prerequisites
 
 Before running the project, ensure that you have the following installed:
