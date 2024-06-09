@@ -45,6 +45,16 @@ function App() {
         type: "bar",
       },
     ],
+    dataZoom: [
+      {
+        type: "inside",
+        start: 0,
+        end: 100,
+        zoomOnMouseWheel: true,
+        moveOnMouseMove: true,
+        preventDefaultMouseMove: false,
+      },
+    ],
   };
 
   useEffect(() => {
