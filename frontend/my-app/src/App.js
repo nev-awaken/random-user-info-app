@@ -1,85 +1,44 @@
+// App.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-import "./App.css";
-import ReactECharts from "echarts-for-react";
+import BarChartComponent from "./BarChartComponent";
+import UserTableComponent from "./UserTableComponent";
+import MapComponent from "./userLocationComponent";
+import Layout from "./Layout";
+import FooterComponent from "./footerComponent";
+import DonutComponent from "./donutChart";
+import { Grid, Typography, Paper, Box, Container, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 
 function App() {
   const [testMessage, setTestMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [rowData, setRowData] = useState([]);
   const [userCount, setBarData] = useState([]);
-
-  const [columnDefs] = useState([
-    { field: "name", headerName: "User Name" },
-    { field: "registered_date", headerName: "Registered Date" },
-    { field: "created_at", headerName: "Creation Date" },
-    { field: "phone_number", headerName: "Phone Number" },
-  ]);
-
-  const barOptions = {
-    tooltip: {
-      trigger: "axis",
-    },
-    title: {
-      text: "User Registrations Per Year",
-      textStyle: {
-        align: "center",
-      },
-    },
-    xAxis: {
-      type: "category",
-      data: userCount.map((item) => item.Year),
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        data: userCount.map((item) => item.countOfUsers),
-        type: "bar",
-        animationDelay: (idx) => idx * 100, 
-        animationDuration: 1000, 
-        animationEasing: "elasticOut", 
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
-        },
-      },
-    ],
-    dataZoom: [
-      {
-        type: "inside",
-        start: 0,
-        end: 100,
-        zoomOnMouseWheel: true,
-        moveOnMouseMove: true,
-        preventDefaultMouseMove: false,
-      },
-    ],
-    animationEasing: "elasticOut", // Easing function for the overall animation
-    animationDelayUpdate: (idx) => idx * 50, // Delay animation for each bar when updating
-  };
+  const [userGenderCount, setGenderCountData] = useState([]);
+  const [countryData, setCountryData] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  
 
   useEffect(() => {
     fetchUsers();
     fetchTest();
     getUserCountPerYear();
+    getUserCountryData();
+    getGenderCountPerYear(selectedYear);
     const interval1 = setInterval(fetchUsers, 10000);
     const interval2 = setInterval(fetchTest, 10000);
     const interval3 = setInterval(getUserCountPerYear, 10000);
+    const interval4 = setInterval(getUserCountryData, 600000);
+    const interval5 = setInterval(() => getGenderCountPerYear(selectedYear), 10000);
 
     return () => {
       clearInterval(interval1);
       clearInterval(interval2);
       clearInterval(interval3);
+      clearInterval(interval4);
+      clearInterval(interval5);
     };
-  }, []);
+  }, [selectedYear]);
 
   const fetchUsers = async () => {
     try {
@@ -97,13 +56,25 @@ function App() {
 
   const getUserCountPerYear = async () => {
     try {
-      console.log("Fetching users");
+      console.log("Fetching user count per year");
       const response = await axios.get("http://127.0.0.1:1000/api/user-count");
       console.log("Response:", response);
       setBarData(response.data);
     } catch (error) {
-      console.error("Error fetching users:", error);
-      setErrorMessage("Error fetching users. Please try again later.");
+      console.error("Error fetching user count:", error);
+      setErrorMessage("Error fetching user count. Please try again later.");
+    }
+  };
+
+  const getUserCountryData = async () => {
+    try {
+      console.log("Fetching user country data");
+      const response = await axios.get("http://127.0.0.1:1000/api/user-location");
+      console.log("Response:", response);
+      setCountryData(response.data);
+    } catch (error) {
+      console.error("Error fetching user country data:", error);
+      setErrorMessage("Error fetching user country data. Please try again later.");
     }
   };
 
@@ -117,30 +88,74 @@ function App() {
     }
   };
 
-  return (
-    <div className="user-info">
-      <h1>Random User Info</h1>
-      <p>UI request Data every 10 seconds to the server</p>
-      <p>Server retrieves data from a postgres Database</p>
-      <p>
-        Data Source -API :{" "}
-        <a href="https://randomuser.me/api/">Random User API</a>
-      </p>
-      <div style={{ height: "300px", width: "100%" }}>
-        <ReactECharts option={barOptions} />
-      </div>
-      <div className="ag-theme-quartz" style={{ height: 600, width: "100%" }}>
-        <AgGridReact
-          rowData={rowData}
-          columnDefs={columnDefs}
-          pagination={true}
-          paginationPageSize={10}
-        />
-      </div>
+  const getGenderCountPerYear = async (year) => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:1000/api/user-gender-count/${year}`);
+      setGenderCountData(response.data);
+    } catch (error) {
+      console.error("Error fetching gender count:", error);
+      setErrorMessage("Error fetching gender count. Please try again later.");
+    }
+  };
 
-      <h1>Test Message</h1>
-      <p>{testMessage}</p>
-    </div>
+  return (
+    <>
+      <Layout>
+        <Container maxWidth="lg">
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom>
+                UI requests data every 10 seconds from the server
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Server retrieves data from a PostgreSQL Database
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Data Source - API: <a href="https://randomuser.me/api/">Random User API</a>
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper elevation={3} style={{ padding: "20px" }}>
+                <BarChartComponent userCount={userCount} />
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper elevation={3} style={{ padding: "20px" }}>
+                <Typography variant="h6" gutterBottom>
+                  User Registration By Country
+                </Typography>
+                <div style={{ height: "400px", width: "100%" }}>
+                  <MapComponent countryData={countryData} />
+                </div>
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper elevation={3} style={{ padding: "20px", height: "400px", overflow: "auto" }}>
+                <UserTableComponent rowData={rowData} />
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper elevation={3} style={{ padding: "20px" }}>
+                <FormControl fullWidth>
+                  <InputLabel>Year</InputLabel>
+                  <Select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+                    {Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <DonutComponent userGenderCount={userGenderCount} />
+              </Paper>
+            </Grid>
+          </Grid>
+        </Container>
+      </Layout>
+      <Box mt={3}>
+        <FooterComponent testMessage={testMessage} />
+      </Box>
+    </>
   );
 }
 
