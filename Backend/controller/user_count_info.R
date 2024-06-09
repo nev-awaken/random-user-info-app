@@ -57,12 +57,11 @@ get_user_count_info <- function(req, res){
 
 
 userCounterPerYear <- function(userData) {
-  print(colnames(userData))
-  
+
   result <- userData %>%
     mutate(Year = year(registered_date)) %>%
     group_by(Year) %>%
     summarise(countOfUsers = n())
-
+  print(result)
   return(result)
 }

@@ -1,3 +1,6 @@
+config <- read_yaml("config.yml")
+postgres_config <- config$default$postgres
+
 createDatabase <- function() {
   con <- connectToDatabase("postgres", autoCreateDb = TRUE)
 
@@ -6,29 +9,43 @@ createDatabase <- function() {
     return(con)
   }
 
-  result <- tryCatch({
-    dbGetQuery(con, "SELECT 1 FROM pg_database WHERE datname = 'ambiorix_test'")
-  }, error = function(e) {
-    cat("Error checking database existence:", conditionMessage(e), "\n")
-    return(list(error = TRUE, message = paste("Error checking database existence:", conditionMessage(e))))
-  })
+  print(postgres_config)
+  dbName <- postgres_config$dbname
+  print(dbName)
+
+  checkDBExistQuery <- sprintf("SELECT 1 FROM pg_database WHERE datname = '%s'", dbName)
+
+  result <- tryCatch(
+    {
+      dbGetQuery(con, checkDBExistQuery)
+    },
+    error = function(e) {
+      cat("Error checking database existence:", conditionMessage(e), "\n")
+      return(list(error = TRUE, message = paste("Error checking database existence:", conditionMessage(e))))
+    }
+  )
 
   if (is.list(result) && isTRUE(result$error)) {
     dbDisconnect(con)
     return(result)
   }
 
+
+  createQuery <- sprintf("CREATE DATABASE %s", dbName)
   if (nrow(result) == 0) {
-    tryCatch({
-      dbExecute(con, "CREATE DATABASE ambiorix_test")
-      cat("Database 'ambiorix_test' created successfully.\n")
-    }, error = function(e) {
-      cat("Error creating database:", conditionMessage(e), "\n")
-      dbDisconnect(con)
-      return(list(error = TRUE, message = paste("Error creating database:", conditionMessage(e))))
-    })
+    tryCatch(
+      {
+        dbExecute(con, createQuery)
+        cat("Database 'ambiorix_test1' created successfully.\n")
+      },
+      error = function(e) {
+        cat("Error creating database:", conditionMessage(e), "\n")
+        dbDisconnect(con)
+        return(list(error = TRUE, message = paste("Error creating database:", conditionMessage(e))))
+      }
+    )
   } else {
-    cat("Database 'ambiorix_test' already exists.\n")
+    cat("Database ", dbName, " already exists.\n")
   }
 
   dbDisconnect(con)
@@ -49,12 +66,15 @@ setupDatabase <- function() {
     return(con)
   }
 
-  result_table <- tryCatch({
-    dbGetQuery(con, "SELECT 1 FROM information_schema.tables WHERE table_name = 'users'")
-  }, error = function(e) {
-    cat("Error checking table existence:", conditionMessage(e), "\n")
-    return(list(error = TRUE, message = paste("Error checking table existence:", conditionMessage(e))))
-  })
+  result_table <- tryCatch(
+    {
+      dbGetQuery(con, "SELECT 1 FROM information_schema.tables WHERE table_name = 'users'")
+    },
+    error = function(e) {
+      cat("Error checking table existence:", conditionMessage(e), "\n")
+      return(list(error = TRUE, message = paste("Error checking table existence:", conditionMessage(e))))
+    }
+  )
 
   if (is.list(result_table) && isTRUE(result_table$error)) {
     dbDisconnect(con)
@@ -62,20 +82,26 @@ setupDatabase <- function() {
   }
 
   if (nrow(result_table) == 0) {
-    tryCatch({
-      dbExecute(con, "CREATE TABLE users (
+    tryCatch(
+      {
+        dbExecute(con, "CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255),
                 registered_date DATE,
                 phone_number VARCHAR(20),
+                latitude NUMERIC(12, 8),
+                longitude NUMERIC(12, 8),
+                gender VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )")
-      cat("Table 'users' created successfully.\n")
-    }, error = function(e) {
-      cat("Error creating table:", conditionMessage(e), "\n")
-      dbDisconnect(con)
-      return(list(error = TRUE, message = paste("Error creating table:", conditionMessage(e))))
-    })
+        cat("Table 'users' created successfully.\n")
+      },
+      error = function(e) {
+        cat("Error creating table:", conditionMessage(e), "\n")
+        dbDisconnect(con)
+        return(list(error = TRUE, message = paste("Error creating table:", conditionMessage(e))))
+      }
+    )
   } else {
     cat("Table 'users' already exists.\n")
   }

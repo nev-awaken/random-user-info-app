@@ -6,8 +6,12 @@ library(RPostgres)
 library(promises)
 library(yaml)
 library(dplyr)
+library(tidyr)
 library(lubridate)
 library(jsonlite)
+library(rworldmap)
+library(sp)
+
 
 plan(multisession)
 
@@ -17,6 +21,7 @@ source("./helpers/connect_db.R")
 source("./jobs/job.R")
 source("./jobs/fetchAndStoreData.R")
 source("./jobs/setupDatabase.R")
+
 
 
 PORT <- 1000L

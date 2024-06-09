@@ -15,10 +15,10 @@ api_call <- async(function() {
     response <- GET("https://randomuser.me/api/")
     if (status_code(response) == 200) {
         result <- content(response, "text")
-    
+
         return(result)
     } else {
-        cat("API request failed with status code:", status_code(response), "\n")
+        cat("API request failed :", status_code(response), "\n")
         return(NULL)
     }
 })
@@ -38,6 +38,12 @@ storeUserData <- async(function(con, data) {
                         name <- NA
                     }
 
+                    if(!is.null(result$gender)){
+                        gender <- result$gender
+                    } else{
+                        gender <- NA
+                    }
+
                     if (!is.null(result$registered.date)) {
                         registered_date <- tryCatch(as.Date(result$registered.date), error = function(e) NA)
                     } else {
@@ -50,16 +56,39 @@ storeUserData <- async(function(con, data) {
                         phone_number <- NA
                     }
 
+                    if (!is.null(result$location.coordinates.latitude) && !is.null(result$location.coordinates.longitude)) {
+                        latitude <- tryCatch(
+                            round(as.numeric(result$location.coordinates.latitude), 6),
+                            warning = function(w) NA,
+                            error = function(e) NA
+                        )
+                        longitude <- tryCatch(
+                            round(as.numeric(result$location.coordinates.longitude), 6),
+                            warning = function(w) NA,
+                            error = function(e) NA
+                        )
+
+                        
+                    } else {
+                        latitude <- NA
+                        longitude <- NA
+                    }
+
                     query <- sprintf(
-                        "INSERT INTO users (name, registered_date, phone_number) VALUES ('%s', '%s', '%s')",
-                        name, format(registered_date, "%Y-%m-%d"), phone_number
+                        "INSERT INTO users (name, registered_date, phone_number, latitude, longitude) VALUES ('%s', '%s', '%s', %s, %s)",
+                        name, format(registered_date, "%Y-%m-%d"), phone_number, latitude, longitude
+                    )
+
+                    insertQuery <- sprintf(
+                        "INSERT INTO users (name, registered_date, phone_number, latitude , longitude, gender) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')",
+                        name, format(registered_date, "%Y-%m-%d"), phone_number, latitude, longitude, gender
                     )
                     tryCatch(
                         {
-                            dbExecute(con, query)
+                            dbExecute(con, insertQuery)
                         },
                         error = function(e) {
-                            message(sprintf("Error in dbExecute: %s", e$message))
+                            message(sprintf("Error in insertQuery: %s", e$message))
                         }
                     )
 
