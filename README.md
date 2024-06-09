@@ -5,7 +5,7 @@ and the frontend is built with React.
 
 ## Overview
 
-The application fetches random user data from the Random User API every 10 seconds and stores it in a PostgreSQL database. The frontend periodically retrieves the stored data from the backend server and displays a table format.
+The application fetches random user data from the Random User API every 10 seconds and stores it in a PostgreSQL database. The frontend periodically retrieves the stored data from the backend server and displays count of people registered in a year.
 
 ![User Interface](./app-user-interface-.png)
 
@@ -62,7 +62,7 @@ Before running the project, ensure that you have the following installed:
 1. The backend server periodically fetches random user data from the Random User API every 10 seconds.
 2. The fetched data is stored in the PostgreSQL database.
 3. The frontend application sends requests to the backend server every 10 seconds to retrieve the stored user data.
-4. The retrieved data is displayed in a table format in the frontend application.
+4. The retrieved data is displayed in a tabular format along witha a bar chart in the frontend application.
 
 
 ## Technologies Used
