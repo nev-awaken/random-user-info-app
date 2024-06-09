@@ -1,4 +1,4 @@
-Random User Info Analyzer Web App
+# Random User Info Analyzer Web App
 
 This is a web application that displays random user information retrieved from a PostgreSQL database. The backend is developed using R with the <a href="https://ambiorix.dev" target="_blank">Ambiorix</a>
 and the frontend is built with React.
