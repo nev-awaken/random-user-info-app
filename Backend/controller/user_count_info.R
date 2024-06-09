@@ -1,27 +1,7 @@
-library(jsonlite)
-library(DBI)
-library(RPostgres)
-library(future)
-library(promises)
-
-config <- read_yaml("config.yml")
-postgres_config <- config$default$postgres
-
-ui_request_handler <- function(req, res) {
-  cat("ui_request_handler called\n")
-  
-  future({
-    con <- tryCatch({
-      dbConnect(Postgres(),
-                   user = postgres_config$user,
-                   host = postgres_config$host,
-                   password = postgres_config$password,
-                   dbname = postgres_config$dbname,
-                   port = postgres_config$port)
-    }, error = function(e) {
-      cat("Failed to connect to database:", conditionMessage(e), "\n")
-      return(list(error = TRUE, message = paste("Failed to connect to database:", conditionMessage(e))))
-    })
+get_user_count_info <- function(req, res){
+ 
+    future({
+    con <- connectToDatabase()
     
     if (is.list(con) && isTRUE(con$error)) {
       return(list(status = 500, data = list(error = con$message)))
@@ -31,7 +11,7 @@ ui_request_handler <- function(req, res) {
     cat("Database connection established\n")
     
     result <- tryCatch({
-      dbGetQuery(con, "SELECT * FROM users")
+      dbGetQuery(con, "SELECT * FROM users ORDER BY id DESC LIMIT 100")
     }, error = function(e) {
       cat("Failed to execute query:", conditionMessage(e), "\n")
       return(list(error = TRUE, message = paste("Failed to execute query:", conditionMessage(e))))
@@ -46,8 +26,8 @@ ui_request_handler <- function(req, res) {
       cat("No users found\n")
       return(list(status = 404, data = list(message = "No users found.")))
     } else {
-      cat("Users found\n")
-      return(list(status = 200, data = result))
+      userCount <- userCounterPerYear(result)
+      return(list(status = 200, data = userCount))
     }
   }) %...>% {
     if (.$status == 500) {
@@ -73,4 +53,16 @@ ui_request_handler <- function(req, res) {
     res$header("Content-Type", "application/json")
     res$send(toJSON(list(error = "Unexpected server error")))
   }
+}
+
+
+userCounterPerYear <- function(userData) {
+  print(colnames(userData))
+  
+  result <- userData %>%
+    mutate(Year = year(registered_date)) %>%
+    group_by(Year) %>%
+    summarise(countOfUsers = n())
+
+  return(result)
 }

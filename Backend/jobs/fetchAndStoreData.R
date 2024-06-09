@@ -6,13 +6,7 @@ library(RPostgres)
 
 callAndStoreUserData <- async(function() {
     data <- await(api_call())
-    con <- dbConnect(Postgres(),
-        user = postgres_config$user,
-        host = postgres_config$host,
-        password = postgres_config$password,
-        dbname = postgres_config$dbname,
-        port = postgres_config$port
-    )
+    con <- connectToDatabase()
     await(storeUserData(con, data))
     dbDisconnect(con)
 })
@@ -21,7 +15,7 @@ api_call <- async(function() {
     response <- GET("https://randomuser.me/api/")
     if (status_code(response) == 200) {
         result <- content(response, "text")
-        cat("API Result:", result, "\n\n")
+    
         return(result)
     } else {
         cat("API request failed with status code:", status_code(response), "\n")

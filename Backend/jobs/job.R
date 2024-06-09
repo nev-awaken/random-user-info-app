@@ -1,5 +1,4 @@
-source("./setupDatabase.R")
-source("./storeData.R")
+
 
 job <- async(function() {
     await(setupDatabase())

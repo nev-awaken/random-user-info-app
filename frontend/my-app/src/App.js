@@ -10,6 +10,7 @@ function App() {
   const [testMessage, setTestMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [rowData, setRowData] = useState([]);
+  const [userCount, setBarData] = useState([]);
 
   const [columnDefs] = useState([
     { field: "name", headerName: "User Name" },
@@ -20,7 +21,7 @@ function App() {
 
   const barOptions = {
     tooltip: {
-      trigger: "axis"
+      trigger: "axis",
     },
     title: {
       text: "User Registrations Per Year",
@@ -30,19 +31,25 @@ function App() {
     },
     xAxis: {
       type: "category",
-      data: [...new Set(rowData.map((user) => user.registered_date.substr(0, 4)))].sort(),
+      data: userCount.map((item) => item.Year),
     },
     yAxis: {
       type: "value",
     },
     series: [
       {
-        data: [...new Set(rowData.map((user) => user.registered_date.substr(0, 4)))].sort().map(
-          (year) =>
-            rowData.filter((user) => user.registered_date.substr(0, 4) === year)
-              .length
-        ),
+        data: userCount.map((item) => item.countOfUsers),
         type: "bar",
+        animationDelay: (idx) => idx * 100, 
+        animationDuration: 1000, 
+        animationEasing: "elasticOut", 
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)",
+          },
+        },
       },
     ],
     dataZoom: [
@@ -55,19 +62,22 @@ function App() {
         preventDefaultMouseMove: false,
       },
     ],
+    animationEasing: "elasticOut", // Easing function for the overall animation
+    animationDelayUpdate: (idx) => idx * 50, // Delay animation for each bar when updating
   };
 
   useEffect(() => {
-    console.log("Component mounted");
     fetchUsers();
     fetchTest();
+    getUserCountPerYear();
     const interval1 = setInterval(fetchUsers, 10000);
     const interval2 = setInterval(fetchTest, 10000);
+    const interval3 = setInterval(getUserCountPerYear, 10000);
 
     return () => {
-      console.log("Component unmounted");
       clearInterval(interval1);
       clearInterval(interval2);
+      clearInterval(interval3);
     };
   }, []);
 
@@ -79,6 +89,18 @@ function App() {
 
       const reversedData = response.data.reverse();
       setRowData(reversedData);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setErrorMessage("Error fetching users. Please try again later.");
+    }
+  };
+
+  const getUserCountPerYear = async () => {
+    try {
+      console.log("Fetching users");
+      const response = await axios.get("http://127.0.0.1:1000/api/user-count");
+      console.log("Response:", response);
+      setBarData(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
       setErrorMessage("Error fetching users. Please try again later.");

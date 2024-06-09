@@ -5,12 +5,21 @@ library(httr)
 library(RPostgres)
 library(promises)
 library(yaml)
+library(dplyr)
+library(lubridate)
+library(jsonlite)
 
 plan(multisession)
 
-source("./job.R")
-source("./user_info_request_handler.R")
-PORT <- 1000
+
+source("./router/user-info.R")
+source("./helpers/connect_db.R")
+source("./jobs/job.R")
+source("./jobs/fetchAndStoreData.R")
+source("./jobs/setupDatabase.R")
+
+
+PORT <- 1000L
 localhost <- "127.0.0.1"
 app <- Ambiorix$new()
 
@@ -27,14 +36,11 @@ app$options("*", function(req, res) {
   res$send()
 })
 
-app$get("/api/users", ui_request_handler)
-
-app$get("/api/test", function(req, res) {
-  str <- paste(Sys.time())
-  res$send(str)
-})
+# Routers to get user-info
+app$use(router)
 
 promises::promise_all(job())
 
-cat("Starting server on", localhost, ":", PORT, "\n")
+
+
 app$start(port = PORT, host = localhost)
