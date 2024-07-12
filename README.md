@@ -70,7 +70,7 @@ Before running the project, ensure that you have the following installed:
 **Backend:**
 
 - R
-- Ambiorix (web framework)
+- ambiorix (web framework)
 - PostgreSQL (database)
 
 **Frontend:**
